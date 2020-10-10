@@ -1,0 +1,140 @@
+Sub StocksTable()
+ 
+'Loop for all worksheets in workbook
+For Each ws In Worksheets
+
+    ' Variables
+    'Variable for current evaluation of stock ticker name in column A
+    Dim currStock As String
+    'Variable for next evaluation of stock ticker name in column A
+    Dim nextStock As String
+    'Variable of stock voulme in column G
+    Dim stockVolume As Double
+    'Variable for advancing loop
+    Dim summTableRow As Integer
+    'Variable for stock's opening price in column C
+    Dim price_open As Double
+    'Variable for stock's closing price in column F
+    Dim price_close As Double
+    'Variable for calculating delta of price open and close
+    Dim price_change As Double
+    'Variable for calculating percentage change in price open and close
+    Dim precent_change As Double
+    'Variable for finding last row
+    Dim Lastrow As Long
+    'Variable for finding last row
+    Dim LastrowK As Integer
+    'Variable for greatest % increase of stock price found in column K
+    Dim highestValue As Double
+    'Variable for greatest % decrease of stock price found in column K
+    Dim lowestValue As Double
+    'Variable for highest stock volume found in column L
+    Dim highestvolume As Double
+ 
+   
+    ' Variable Assignments for Ticker Loop
+    stockVolume = 0
+    summTableRow = 2
+    Lastrow = ws.Cells(Rows.Count, "A").End(xlUp).Row
+    price_open = 0
+    price_open = ws.Cells(2, 3).Value
+    
+    
+    'Variable assignments for Aggregate Loop
+    highestValue = Cells(2, 11).Value
+    lowestValue = Cells(2, 11).Value
+    highestvolume = Cells(2, 12).Value
+    LastrowK = ws.Cells(Rows.Count, "K").End(xlUp).Row
+    
+    
+    'Table Headings the Aggregation Table columns I-L
+    ws.Cells(1, 9).Value = "Ticker"
+    ws.Cells(1, 10).Value = "Yearly Change"
+    ws.Cells(1, 11).Value = "Percent Change"
+    ws.Cells(1, 12).Value = "Total Stock Volume"
+    'Table Headers for Highlights columns O-P
+    ws.Cells(2, 15).Value = "Greatest % Increase"
+    ws.Cells(3, 15).Value = "Greatest % Decrease"
+    ws.Cells(4, 15).Value = "Greatest Total Volume"
+    ws.Cells(1, 16).Value = "Ticker"
+    ws.Cells(1, 17).Value = "Value"
+             
+    ' Looping through stock tickers
+    For I = 2 To Lastrow
+        ' Current Stock Ticker, Next Stock Ticker, and Total Volume
+        currStock = ws.Cells(I, 1).Value
+        nextStock = ws.Cells(I + 1, 1).Value
+        stockVolume = stockVolume + ws.Cells(I, 7).Value
+        
+        
+        ' IF the next stock ticker is different than the current one, collect Closing price, and calculate
+        If currStock <> nextStock Then
+        price_close = ws.Cells(I, 6).Value
+        price_change = price_close - price_open
+            If price_open = 0 Then
+            percent_change = (price_close / 0.00001)
+            Else
+            percent_change = (price_close / price_open) - 1
+            End If
+            
+        
+            ' write values to summary table
+            ws.Cells(summTableRow, 9).Value = currStock
+            ws.Cells(summTableRow, 10).Value = price_change
+            ws.Cells(summTableRow, 11).Value = percent_change
+            ws.Cells(summTableRow, 12).Value = stockVolume
+            'Formating colmun K for percentages
+            ws.Cells(summTableRow, 11).NumberFormat = "0.00%"
+            
+            'Formating cell interiors green for increases and red for decreases in column K
+             If percent_change > 0 Then
+             ws.Cells(summTableRow, 11).Interior.ColorIndex = 4
+             ElseIf percent_change < 0 Then
+             ws.Cells(summTableRow, 11).Interior.ColorIndex = 3
+             End If
+             
+            
+            ' incrementing summary table row for next interation
+            summTableRow = summTableRow + 1
+            'Grabbing opening price for the next stock ticker
+            price_open = ws.Cells(I + 1, 3).Value
+            
+            ' reset the stock volume amount for next interation
+            stockVolume = 0
+        End If
+    Next I
+    
+    
+    'Looping through the Aggregate Table
+    
+    For k = 2 To LastrowK
+    
+        'Greatest Increase Calculation and Formating
+        If highestValue < ws.Cells(k, 11) Then
+            highestValue = ws.Cells(k, 11).Value
+            ws.Cells(2, 17).Value = highestValue
+            ws.Cells(2, 17).NumberFormat = "0.00%"
+            ws.Cells(2, 16) = ws.Cells(k, 9).Value
+            End If
+    
+        'Greatest Decrease Calculation and Formating
+        If lowestValue > ws.Cells(k, 11) Then
+            lowestValue = ws.Cells(k, 11).Value
+            ws.Cells(3, 17).Value = lowestValue
+            ws.Cells(3, 17).NumberFormat = "0.00%"
+            ws.Cells(3, 16) = ws.Cells(k, 9).Value
+            End If
+        'Greatest Volume Calculation and Formating
+        If highestvolume < ws.Cells(k, 12) Then
+            highestvolume = ws.Cells(k, 12).Value
+            ws.Cells(4, 17).Value = highestvolume
+            ws.Cells(4, 16) = ws.Cells(k, 9).Value
+            End If
+            
+    Next k
+Next ws
+
+End Sub
+
+
+
