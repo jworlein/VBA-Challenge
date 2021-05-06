@@ -1,0 +1,131 @@
+Sub StocksTable()
+    ' Variables
+    Dim currStock As String
+    Dim nextStock As String
+    Dim stockVolume As Double
+    Dim summTableRow As Integer
+    Dim price_open As Double
+    Dim price_close As Double
+    Dim price_change As Double
+    Dim precent_change As Double
+    Dim Lastrow As Long
+    
+    
+    ' Variable Assignments
+    stockVolume = 0
+    summTableRow = 2
+    Lastrow = Cells(Rows.Count, "A").End(xlUp).Row
+    
+    
+    'Table Headings
+    Cells(1, 9).Value = "Ticker"
+    Cells(1, 10).Value = "Yearly Change"
+    Cells(1, 11).Value = "Percent Change"
+    Cells(1, 12).Value = "Total Stock Volume"
+   
+    
+    price_open = Cells(2, 3).Value
+    
+    
+    ' Loopin for Values by Stock Ticker
+    For i = 2 To Lastrow
+        ' Current Stock Ticker, Next Stock Ticker, and Total Volume
+        currStock = Cells(i, 1).Value
+        nextStock = Cells(i + 1, 1).Value
+        stockVolume = stockVolume + Cells(i, 7).Value
+        
+        
+        ' IF the next stock ticker is different than the current one, collect Closing price, and calculate
+        If currStock <> nextStock Then
+        price_close = Cells(i, 6).Value
+        price_change = price_close - price_open
+        percent_change = (price_close / price_open) - 1
+        
+            ' write values to summary table
+            Cells(summTableRow, 9).Value = currStock
+            Cells(summTableRow, 10).Value = price_change
+            Cells(summTableRow, 11).Value = percent_change
+            Cells(summTableRow, 12).Value = stockVolume
+            
+            
+            ' increment summary table row (moving on)
+            summTableRow = summTableRow + 1
+            'gather opening price for the next stock ticker
+            price_open = Cells(i + 1, 3).Value
+            
+            ' reset the stock volume amount for next interation
+            stockVolume = 0
+        End If
+        
+        
+    Next i
+    'Formating
+
+    Dim LastrowK As Integer
+    Dim firstCondition As FormatCondition
+    Dim secondCondition As FormatCondition
+
+
+    LastrowK = Cells(Rows.Count, "K").End(xlUp).Row
+
+    Range("K2:K2" & Lastrow).Select
+        Selection.NumberFormat = "0.00%"
+
+
+
+    Range("K2:K2" & Lastrow).Select
+        Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlGreater, _
+           Formula1:="=0"
+        Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+             With Selection.FormatConditions(1).Interior
+            '.PatternColorIndex = xlAutomatic
+            .Color = 5296274
+            '.TintAndShade = 0
+        End With
+        Selection.FormatConditions(1).StopIfTrue = False
+        Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlLess, _
+             Formula1:="=0"
+        Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+            With Selection.FormatConditions(1).Interior
+            '.PatternColorIndex = xlAutomatic
+            .Color = 255
+            '.TintAndShade = 0
+         End With
+        Selection.FormatConditions(1).StopIfTrue = False
+
+
+    'Top performing stock Table
+    
+    'variables for table
+    Dim highest As Double
+    Dim lowest As Double
+    Dim highvolume As Double
+    
+    
+    'Table Headers
+    Cells(2, 15).Value = "Greatest % Increase"
+    Cells(3, 15).Value = "Greatest % Decrease"
+    Cells(4, 15).Value = "Greatest Total Volume"
+    
+    'Greatest Increase Calculation and Formating
+    highest = WorksheetFunction.Max(Range("K2:K2000"))
+    Cells(2, 16).Value = highest
+        Cells(2, 16).Select
+            Selection.NumberFormat = "0.00%"
+            
+    'Greatest DEcrease Calculation and Formating
+    lowest = WorksheetFunction.Min(Range("K2:K2000"))
+    Cells(3, 16).Value = lowest
+        Cells(3, 16).Select
+            Selection.NumberFormat = "0.00%"
+            
+    'Highest Volume Calculation and Formating
+    highvolume = WorksheetFunction.Max(Range("L2:L2000"))
+    Cells(4, 16).Value = highvolume
+        Cells(3, 16).Select
+            Selection.NumberFormat = "0.00%"
+    
+
+End Sub
+
+
